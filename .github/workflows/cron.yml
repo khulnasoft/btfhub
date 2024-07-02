@@ -22,14 +22,6 @@ jobs:
           remove-dotnet: "true"
           remove-haskell: "true"
       #
-      - name: Setup Swap File
-        run: |
-          fallocate -l 16G /swapfile
-          chmod 600 /swapfile
-          mkswap /swapfile
-          swapon /swapfile
-        shell: bash
-      #
       - name: Check out BTFHub
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
@@ -46,7 +38,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: khulnasoft/btfhub-archive
-          token: ${{ secrets.GEYSLAN_BTFHUB_PAT }}
+          token: ${{ secrets.ORG_REPO_TOKEN }}
           persist-credentials: false
           fetch-depth: 1
           path: ./btfhub-archive
