@@ -1,0 +1,104 @@
+name: Update BTFHub Archive
+on:
+  schedule:
+    - cron: "0 1 * * *"
+  workflow_dispatch: {}
+jobs:
+  build:
+    name: Update BTF Archive
+    env:
+      HOME: "/tmp/root"
+      GOPATH: "/tmp/go"
+      GOCACHE: "/tmp/go-cache"
+      GOROOT: "/usr/local/go"
+    runs-on:
+      - graas_ami-0f4881c8d69684001_${{ github.event.number }}${{ github.run_attempt }}-${{ github.run_id }}
+      - EXECUTION_TYPE=LONG
+    steps:
+      #
+      - name: Setup Swap File
+        run: |
+          fallocate -l 16G /swapfile
+          chmod 600 /swapfile
+          mkswap /swapfile
+          swapon /swapfile
+        shell: bash
+      #
+      - name: Check out BTFHub
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          repository: khulnasoft/btfhub
+          path: ./btfhub
+      #
+      - name: "Prepare Image (Fix AMI)"
+        uses: ./btfhub/.github/actions/build-dependencies
+        with: 
+          run-on: ./btfhub
+          from: cron
+      #
+      - name: Checkout BTFHub Archive
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          repository: khulnasoft/btfhub-archive
+          token: ${{ secrets.GEYSLAN_BTFHUB_PAT }}
+          persist-credentials: false
+          fetch-depth: 1
+          path: ./btfhub-archive
+      - name: Bring current BTFHub Archive
+        run: |
+          cd btfhub
+          make bring
+        shell: bash
+      #
+      - name: Compile BTFHub Tool
+        run: |
+          cd btfhub
+          make
+        shell: bash
+      #
+      - name: Fetch and Generate new BTFs (UBUNTU)
+        run: |
+          cd btfhub
+          ./btfhub -workers 6 -d ubuntu
+      # debian stretch seems to be gone, updates for buster and bullseye only
+      - name: Fetch and Generate new BTFs (DEBIAN)
+        run: |
+          cd btfhub
+          ./btfhub -workers 6 -d debian -r buster
+          ./btfhub -workers 6 -d debian -r bullseye
+      #
+      - name: Fetch and Generate new BTFs (CENTOS)
+        run: |
+          cd btfhub
+          ./btfhub -workers 6 -d centos
+      #
+      - name: Fetch and Generate new BTFs (FEDORA)
+        run: |
+          cd btfhub
+          ./btfhub -workers 6 -d fedora
+      #
+      - name: Fetch and Generate new BTFs (ORACLE)
+        run: |
+          cd btfhub
+          ./btfhub -workers 6 -d ol
+      #
+      - name: Take new BTFs to BTFHub Archive
+        run: |
+          cd btfhub
+          make take
+      #
+      - name: Check Status
+        run: |
+          cd btfhub-archive
+          git status
+      #
+      - name: Commit and Push to BTFHub Archive
+        uses: actions-js/push@5a7cbd780d82c0c937b5977586e641b2fd94acc5 # v1.5
+        with:
+          directory: ./btfhub-archive
+          author_email: 'geyslan@gmail.com'
+          author_name: 'Geyslan Gregório'
+          github_token: ${{ secrets.GEYSLAN_BTFHUB_PAT }}
+          message: 'Update BTFHUB Archive from BTFHUB'
+          repository: khulnasoft/btfhub-archive
+          branch: main
