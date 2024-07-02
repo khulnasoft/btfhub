@@ -1,8 +1,10 @@
 name: Update BTFHub Archive
+
 on:
   schedule:
     - cron: "0 1 * * *"
   workflow_dispatch: {}
+
 jobs:
   build:
     name: Update BTF Archive
@@ -10,8 +12,8 @@ jobs:
       HOME: "/tmp/root"
       GOPATH: "/tmp/go"
       GOCACHE: "/tmp/go-cache"
-      GOROOT: "/usr/local/go"
     runs-on: ubuntu-latest
+
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@v10
@@ -21,60 +23,66 @@ jobs:
           remove-docker-images: "true"
           remove-dotnet: "true"
           remove-haskell: "true"
-      #
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.20'
+
       - name: Check out BTFHub
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           repository: khulnasoft/btfhub
           path: ./btfhub
-      #
-      - name: "Prepare Image (Fix AMI)"
+
+      - name: Prepare Image (Fix AMI)
         uses: ./btfhub/.github/actions/build-dependencies
         with: 
           run-on: ./btfhub
           from: cron
-      #
+
       - name: Checkout BTFHub Archive
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        uses: actions/checkout@v4
         with:
           repository: khulnasoft/btfhub-archive
           token: ${{ secrets.ORG_REPO_TOKEN }}
           persist-credentials: false
           fetch-depth: 1
           path: ./btfhub-archive
+
       - name: Bring current BTFHub Archive
         run: |
           cd btfhub
           make bring
         shell: bash
-      #
+
       - name: Compile BTFHub Tool
         run: |
           cd btfhub
           make
         shell: bash
-      #
+
       - name: Fetch and Generate new BTFs (UBUNTU)
         run: |
           cd btfhub
           ./btfhub -workers 6 -d ubuntu
-      #
+
       - name: Take new BTFs to BTFHub Archive
         run: |
           cd btfhub
           make take
-      #
+
       - name: Check Status
         run: |
           cd btfhub-archive
           git status
-      #
+
       - name: Commit and Push to BTFHub Archive
-        uses: actions-js/push@5a7cbd780d82c0c937b5977586e641b2fd94acc5 # v1.5
+        uses: actions-js/push@v1.5
         with:
           directory: ./btfhub-archive
-          author_email: 'geyslan@gmail.com'
-          author_name: 'Geyslan Gregório'
+          author_email: 'info@khulnasoft.com'
+          author_name: 'KHULNASOFT-BOT'
           github_token: ${{ secrets.ORG_REPO_TOKEN }}
           message: 'Update BTFHUB Archive from BTFHUB'
           repository: khulnasoft/btfhub-archive
