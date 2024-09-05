@@ -19,7 +19,6 @@ jobs:
         run: |
           # disable default debuginfo repositories
           yum-config-manager -y --disable amazonlinux-debuginfo
-
           # add Amazon Linux 2 debuginfo repositories
           append_repo() {
             local arch=$1
@@ -31,7 +30,6 @@ jobs:
           enabled=1
           "
           }
-
           cat << EOF >> /etc/yum.repos.d/amazonlinux.repo
           $(append_repo "x86_64")
           $(append_repo "aarch64")
@@ -75,7 +73,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: khulnasoft/btfhub-archive
-          token: ${{ secrets.ORG_REPO_TOKEN }}
+          token: ${{ secrets.GEYSLAN_BTFHUB_PAT }}
           persist-credentials: false
           fetch-depth: 1
           path: ./btfhub-archive
@@ -109,7 +107,7 @@ jobs:
           directory: ./btfhub-archive
           author_email: 'geyslan@gmail.com'
           author_name: 'Geyslan Gregório'
-          github_token: ${{ secrets.ORG_REPO_TOKEN }}
+          github_token: ${{ secrets.GEYSLAN_BTFHUB_PAT }}
           message: 'Update BTFHUB Archive from BTFHUB'
           repository: khulnasoft/btfhub-archive
           branch: main
@@ -150,7 +148,7 @@ jobs:
         uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           repository: khulnasoft/btfhub-archive
-          token: ${{ secrets.ORG_REPO_TOKEN }}
+          token: ${{ secrets.GEYSLAN_BTFHUB_PAT }}
           persist-credentials: false
           fetch-depth: 1
           path: ./btfhub-archive
@@ -215,7 +213,7 @@ jobs:
           directory: ./btfhub-archive
           author_email: 'geyslan@gmail.com'
           author_name: 'Geyslan Gregório'
-          github_token: ${{ secrets.ORG_REPO_TOKEN }}
+          github_token: ${{ secrets.GEYSLAN_BTFHUB_PAT }}
           message: 'Update BTFHUB Archive from BTFHUB'
           repository: khulnasoft/btfhub-archive
           branch: main
