@@ -1,3 +1,29 @@
+
+Skip to content
+Navigation Menu
+
+    khulnasoft
+    /
+    btfhub
+
+Code
+Issues 12
+Pull requests
+Discussions
+Actions
+Security
+
+    Insights
+
+Update BTFHub Archive
+Update BTFHub Archive #1159
+
+Jobs
+
+Run details
+
+Workflow file for this run
+.github/workflows/cron.yml at 9748a26
 name: Update BTFHub Archive
 on:
   schedule:
@@ -217,3 +243,4 @@ jobs:
           message: 'Update BTFHUB Archive from BTFHUB'
           repository: khulnasoft/btfhub-archive
           branch: main
+Add "k/" to URL for Fedora updates (#119) · khulnasoft/btfhub@c40bd15
